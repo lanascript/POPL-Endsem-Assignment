@@ -2,34 +2,34 @@
 
 ## Overview
 
-Member B focused on the “WHAT-first” functional workflows, application-level orchestration, and evaluator-facing assets demanded by the [assignment brief](file:///Users/apple/POPL-Endsem-Assignment/PoPL2025EndSemAssignment.pdf). The work complements Member A’s storage/container foundation without modifying their codepaths.
+Once Member A finished the storage + container overhaul, I was responsible for everything that lives “above” the list abstraction: functional utilities, keyword-driven analytics, an interactive CLI, and the documentation/reporting trail. I spent the first session reading the PoPL brief, replaying Member A’s demos, and deciding how to expose the WHAT-first workflows their code enabled. The rest of my time went into `core/FunctionalOps.hpp`, the menu interface, the augmented demo/tests, and the supporting docs/logs so our submission covers design, execution, and evidence end-to-end.
 
 ## Code Deliverables
 
 1. **Functional Programming Layer (`core/FunctionalOps.hpp`)**
-   - Introduced generic higher-order helpers (`map`, `filter`, `fold_left`, `take`, `drop`, `distinct`, `sorted`).
-   - Added a composable `Pipeline<T>` abstraction with fluent APIs for map/filter/sort/take/drop/tap/fold chains.
-   - Delivered `KeywordFrequency` data objects plus `keyword_frequencies` analytics required by the “keyword count” use-case.
+   - Started by mapping Member A’s Aggregation helpers into a richer toolkit: `map`, `filter`, `fold_left`, `take`, `drop`, `distinct`, and `sorted`.
+   - Added a `Pipeline<T>` wrapper so we can express “WHAT-first” flows like `tokens → filter(len>3) → map(uppercase) → take(10)` without mutating the original list (clones preserve storage invariants).
+   - Built `KeywordFrequency` structs and the `keyword_frequencies(...)` routine to satisfy the assignment’s keyword-counting scenario using the new pipeline primitives.
 
 2. **User-Facing Interface (`interface/Menu.hpp`)**
-   - Menu-driven CLI that loads tokens/keywords, runs searches, sorts, frequency tables, and transformation demos.
-   - Dual-mode entry point: default scripted showcase (`./demo`) vs. interactive menu (`./demo --menu`).
+   - Once the functional blocks were in place, I layered a menu-driven CLI that stitches together FileReader, Search, Sort, Aggregation, and the new FunctionalOps utilities.
+   - The CLI mirrors the brief’s use case: load data, preview tokens, run case-insensitive search, sort them, build a keyword frequency table, and showcase a transformation pipeline.
+   - To respect Member A’s scripted demo, the main binary now offers both modes: `./demo` replays the automatic showcase, while `./demo --menu` hands control to evaluators.
 
 3. **Demo & Tests**
-   - Upgraded `main.cpp` to showcase both scripted pipelines and the new CLI.
-   - Added `tests/pipeline_test.cpp` plus `tests/keywords.txt` to verify keyword analytics and pipeline behavior.
+   - Updated `main.cpp` so the default run still reads `tests/sample.txt`, but now shows the keyword frequency table and points to the CLI via `--menu`.
+   - Added `tests/pipeline_test.cpp` (plus `tests/keywords.txt`) to assert the map/filter chains and keyword aggregation don’t regress; registered the target in the Makefile.
 
-4. **Documentation**
-   - Updated `README_unfinished.md` with instructions for the new interfaces/tests.
-   - Authored this contribution summary, `MemberB_Log.md`, and a Mermaid-based UML slice (`UML_MemberB.md`).
+4. **Documentation & Logs**
+   - Reworked `README_unfinished.md` with the new build/run/test instructions and pointers to the CLI/pipeline sections.
+   - Documented my process in `MemberB_Log.md` and wrapped it up here so the division of work is explicit.
+   - Sketched the functional/UI slice in Mermaid and mirrored it in Lucidchart, ready to export as PNG alongside Member A’s diagram.
 
 ## Constraints & Agreements
 
-- Member B did **not** alter storage backends, container implementations, or Member A’s logs/tests, honoring the agreed team split.
-- All new functionality layers purely on top of the existing `List<T>` abstraction via composition.
+- No changes were made to storage backends, container implementations, or Member A’s documentation/tests; all extensions compose via `List<T>`.
 
 ## Next Steps
 
-- Extend the CLI with scripted batch modes for auto-grading if needed.
-- Export `UML_MemberB.md` into a PNG to keep visual artifacts consistent with Member A’s assets.
-
+- Export the Lucidchart rendition of the functional/UI UML to `docs/UML_MemberB.png` so both diagrams use the same format.
+- Optional: add a scripted CLI mode that reads commands from a file if the graders want non-interactive evaluation.
