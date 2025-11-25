@@ -62,6 +62,17 @@ The central abstraction providing core list operations:
 | **Sorting** | Default sort, Custom comparator sort, Stable sort |
 | **Aggregation** | `counting_inversions`, `average` (numeric), `map`, `filter`, `reduce` |
 
+### 5\. Functional Programming Layer (Member B)
+
+- `core/FunctionalOps.hpp` exposes composable higher-order helpers (`map`, `filter`, `fold_left`, `distinct`, `take`, `drop`, `sorted`) without forcing mutation of the original list.
+- `FunctionalOps::Pipeline<T>` enables readable transformation chains; pipelines back `clone()`-driven copies so the storage abstraction remains intact.
+- `FunctionalOps::keyword_frequencies` produces printable `keyword -> count` tables that satisfy the assignment's analytics use-case.
+
+### 6\. Interactive CLI Layer (Member B)
+
+- `interface/Menu.hpp` offers a menu-driven UX over the entire stack (file loading, search, sort, keyword analytics, transformation demos).
+- Scripted mode (`./demo`) still runs for graders, while `./demo --menu` launches the CLI for deeper exploration.
+
 -----
 
 ## ⚙️ Build and Run Instructions
@@ -89,7 +100,8 @@ make clean
 Execute the main demonstration of the framework's capabilities:
 
 ```bash
-./demo
+./demo          # scripted showcase using tests/sample.txt
+./demo --menu   # interactive CLI with menu + pipelines
 ```
 
 -----
@@ -114,15 +126,21 @@ Run all tests individually to check module functionality:
 
 # Aggregation functions tests
 ./aggregation_test
+
+# Functional pipeline & keyword analytics tests
+./pipeline_test
 ```
 
 -----
 
 ## 📐 Documentation
 
-The updated UML Class Diagram illustrating the Contain-and-Delegate architecture is located here:
+The updated UML documentation is split so each member owns a slice:
 
-  * **UML Diagram:** `/docs/uml.png`
+  * **Member A UML Diagram:** `/docs/uml.png`
+  * **Member B Functional + UI Slice (Mermaid spec):** `/docs/UML_MemberB.md`
+  * **Logs:** `/docs/DEVLOG_MEMBER_A.md`, `/docs/MemberB_Log.md`
+  * **Contribution Summaries:** `/docs/Contributions_MemberA.md`, `/docs/MemberB_Contribution.md`
 
 -----
 
