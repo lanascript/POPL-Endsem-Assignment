@@ -28,8 +28,3 @@ Once Member A finished the storage + container overhaul, I was responsible for
 ## Constraints & Agreements
 
 - No changes were made to storage backends, container implementations, or Member A’s documentation/tests; all extensions compose via `List<T>`.
-
-## Next Steps
-
-- Export the Lucidchart rendition of the functional/UI UML to `docs/UML_MemberB.png` so both diagrams use the same format.
-- Optional: add a scripted CLI mode that reads commands from a file if the graders want non-interactive evaluation.

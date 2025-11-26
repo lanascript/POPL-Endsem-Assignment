@@ -64,14 +64,16 @@ The central abstraction providing core list operations:
 
 ### 5\. Functional Programming Layer (Member B)
 
-- `core/FunctionalOps.hpp` exposes composable higher-order helpers (`map`, `filter`, `fold_left`, `distinct`, `take`, `drop`, `sorted`) without forcing mutation of the original list.
-- `FunctionalOps::Pipeline<T>` enables readable transformation chains; pipelines back `clone()`-driven copies so the storage abstraction remains intact.
-- `FunctionalOps::keyword_frequencies` produces printable `keyword -> count` tables that satisfy the assignment's analytics use-case.
+- `core/FunctionalOps.hpp` introduces higher-order helpers (`map`, `filter`, `fold_left`, `take`, `drop`, `distinct`, `sorted`) that reuse the existing `List<T>` abstraction without touching storage backends.
+- `FunctionalOps::Pipeline<T>` wraps lists in a fluent API (e.g., `tokens → filter(len > 3) → map(uppercase) → take(10)`) while respecting move-only semantics through cloning.
+- `FunctionalOps::keyword_frequencies` implements the assignment’s keyword analytics use case, returning sorted `keyword -> count` rows for any token/keyword inputs.
+- Additional helpers (`FunctionalOps::from`, `keyword` DTOs) power the new tests (`tests/pipeline_test.cpp`, `tests/keywords.txt`) and demo flows.
 
 ### 6\. Interactive CLI Layer (Member B)
 
-- `interface/Menu.hpp` offers a menu-driven UX over the entire stack (file loading, search, sort, keyword analytics, transformation demos).
-- Scripted mode (`./demo`) still runs for graders, while `./demo --menu` launches the CLI for deeper exploration.
+- `interface/Menu.hpp` defines a `MenuApp` UI that wires FileReader, Search, Sort, Aggregation, and the functional operations into an evaluator-friendly workflow (load → inspect → search → sort → analyze → transform).
+- The main binary now supports dual entry points: `./demo` (scripted showcase using `tests/sample.txt`) and `./demo --menu` (interactive mode).
+- Menu actions guard against missing files, print keyword frequency tables, and run transformation pipelines so the full WHAT-first design can be demonstrated live.
 
 -----
 
