@@ -80,6 +80,13 @@ The central abstraction providing core list operations:
 ## ⚙️ Build and Run Instructions
 
 This project uses `g++` with C++17 standard features.
+### Clean
+
+Remove all compiled object files and executables:
+
+```bash
+make clean
+```
 
 ### Build
 
@@ -89,13 +96,7 @@ Compile all source files and generate executables:
 make
 ```
 
-### Clean
 
-Remove all compiled object files and executables:
-
-```bash
-make clean
-```
 
 ### Running the Demo
 
