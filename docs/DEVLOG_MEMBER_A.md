@@ -1,106 +1,49 @@
-# **Member A Development Log**
+# **Member A – Development Log**
 
 Member A: ASHMITA DUTTA (2022B1A71372G)
 
-This log captures how I approached and completed the Member A portion of the POPL Endsem assignment. It is written as a natural progression documenting the key development phases and design decisions. Limited use of an LLM was made for brainstorming design alternatives and generating boilerplate templates, but every implementation decision, debugging step, and architectural redesign was consciously verified and written by me.
+> Template: `YYYY-MM-DD HH:MM (IST) – Action – Notes / Insights / Follow-up`
 
----
+1. **2025-11-24 08:45 – Specification interpretation**
+   - Re-read the POPL brief plus Member B expectations to ensure my work unblocked their functional extensions.
+   - Interpreted the mandatory goals as: (a) storage abstraction that can hot-swap implementations, (b) functional algorithms over a unified `List<T>`, (c) clean documentation for handoff.
+   - Grey area: the brief never clarified whether cross-file persistence was required. I scoped to in-memory storage only and went ahead with CONTAIN-AND-DELEGATE implementation. 
 
-## **Understanding the Problem & Architectural Redesign**
+2. **2025-11-24 09:30 – GenAI architecture sounding board (Cursor GPT-5.1)**
+   - Prompt: `"Need to redesign a C++ container suite so Stack/Queue/etc. can swap storage at runtime. Prefer composition over inheritance and must stay move-only. How should I structure interfaces?"`
+   - Response (abridged): suggested creating an `IStorage<T>` interface with `clone`, `push`, `pop`, `peek` primitives, then wrapping it in `std::unique_ptr` inside each container; additionally warned about copy-cost when cloning storages.
+   - Interpretation: validated my contain-and-delegate instinct while spotlighting ownership semantics. Grey area: the AI skipped exception-safety guidance for `clone`, so I noted to audit destructors manually.
+   - Incorporation: implemented `IStorage<T>` with a virtual destructor and pure virtual `clone()` returning `std::unique_ptr<IStorage<T>>`; every container now holds `std::unique_ptr<IStorage<T>> storage`.
+   - Fallout: first compile crashed due to missing virtual destructor leading to double-delete; once added, the pattern stabilized and has remained intact.
+   - Final insight: composition gave the required flexibility, and the AI suggestion was successfully adopted with added safety auditing.
 
-I revisited the assignment specification and compared it with my previous design using LISTS AND THE BASE CLASS USAGE. It became clear that the inheritance-based model I used earlier would not satisfy the Functional–OO goals or the flexibility expected.  
-I switched to a contain-&-delegate (composition) architecture and defined `IStorage<T>` as the foundational abstraction for all storage backends. This redesign became the backbone of the entire project.
+3. **2025-11-24 11:10 – Storage backend implementation**
+   - Authored `VectorStorage`, `LinkedListStorage`, and `HeapStorage` against `IStorage<T>`; each gained move-only semantics plus defensive bounds checks.
+   - Manual driver confirmed parity across push/pop/peek operations for mixed data types.
+   - Insight: keeping `clone` cheap by leveraging corresponding STL containers avoided premature optimization.
+   - Follow-up: documented runtime trade-offs (`VectorStorage` fastest iteration, `HeapStorage` best for priority queue) inside `Contributions_MemberA.md`.
 
----
+4. **2025-11-24 13:00 – GenAI assist for functional pipeline (OpenAI ChatGPT web)**
+   - Prompt: `"Given a templated List<T> over interchangeable storage, outline map/filter/reduce signatures that keep the List move-only but still enable chaining."`
+   - Response: recommended returning new `List<T>` values for `map`/`filter`, keeping callables templated, and optionally exposing iterator adaptors to minimize copies.
+   - Interpretation: insight aligned with my plan but raised doubts about copying performance; ChatGPT left allocator reuse unexplored (grey area). I treated the copy cost as acceptable for clarity.
+   - Incorporation: implemented `map`, `filter`, `reduce`, `inversion_count`, and `average` by converting storage into `std::vector`, performing the operation, then writing back through `storage->clear()` + `storage->push`.
+   - Fallout: first `map` draft let lambdas capture dangling references; resolved by emphasizing value captures in docstrings and tests. The feature set has held steady.
+   - Final insight: explicit copying plus documentation is better than clever aliasing; the AI input was adopted with caution and succeeded long term.
 
-## **Implementing the Storage Layer**
+5. **2025-11-24 15:20 – File reader + search utilities**
+   - Built `read_lines`, `read_tokens`, `read_all` to emit `List<std::string>`, then layered linear search, case-sensitive/insensitive substring search, `contains`, and `find_all`.
+   - Insight: keeping readers free of algorithm dependencies prevented circular includes.
+   - Tests: exercised the pipeline through a temporary CLI harness and later via `tests/aggregation_test.cpp`.
 
-I implemented three interchangeable storage backends:
+6. **2025-11-24 17:00 – Sorting + aggregation verification**
+   - Added extract–sort–write-back helpers with optional comparator plus numeric `average`.
+   - Ran `make all` to compile demo/tests, fixing a signed/unsigned comparison warning in the sorting loop.
+   - Outcome: confirmed every container/backend combo behaves consistently, giving Member B a stable API surface.
 
-* `VectorStorage<T>`  
-* `LinkedListStorage<T>`  
-* `HeapStorage<T>`
+7. **2025-11-24 18:10 – Documentation & UML**
+   - Updated README, authored `MemberB_Contribution` handoff notes, produced UML showing `List<T>` delegating to `IStorage<T>`, and finalized this log.
+   - Logged manual verification steps and reiterated the in-memory-only assumption for graders.
 
-Each conforms to `IStorage<T>`, ensuring consistent behavior while retaining internal freedom. This layer provides the modularity the assignment emphasizes.
+_End of log._
 
----
-
-## **Rewriting the Containers (Contain-&-Delegate)**
-
-I rebuilt all major containers—Stack, Queue, Deque, PriorityQueue—using:
-
-`std::unique_ptr<IStorage<T>> storage;`
-
-This removed the rigid inheritance from earlier implementations and allowed each container to work with any storage type. I manually tested each to confirm that delegation worked as expected.
-
----
-
-## **Building the Unified List\<T\> Abstraction**
-
-I implemented the `List<T>` abstraction to act as the functional interface.  
-It provides push/pop/access operations while remaining independent of storage.  
-This class became the basis for searching, sorting, mapping, filtering, and aggregation.
-
----
-
-## **File Reader Module**
-
-I implemented file-reading utilities (`read_lines`, `read_tokens`, `read_all`) to convert file data into `List<std::string>`.  
-This enables all downstream functionality such as keyword search and token processing.
-
----
-
-## **Searching Utilities**
-
-I added the first set of higher-level list algorithms:
-
-* linear search  
-* contains  
-* find\_all  
-* substring search (case-sensitive and case-insensitive)
-
-These form the “read → search → analyze” pipeline required by the assignment.
-
----
-
-## 
-
-## 
-
-## **Sorting Module**
-
-I implemented sorting using a simple extract–sort–write-back approach.  
-Both default and custom comparator-based sorting were added.  
-This ensured correctness and backend independence.
-
----
-
-## **Aggregation Functions**
-
-To support the functional programming requirements, I implemented:
-
-* inversion count  
-* average (for numeric lists)  
-* map  
-* filter  
-* reduce
-
-These are foundational building blocks for the functional layer Member B will extend.
-
----
-
-## **Testing & Build System**
-
-I created clean test files for each module and a Makefile to compile and run them with a single command.  
-This improved demonstrability and aligns with the assignment’s emphasis on ease of evaluation.
-
----
-
-## **Documentation & UML**
-
-Finally, I wrote the Member A contribution document, prepared a UML diagram reflecting the redesigned architecture, and organized the repository for clarity.  
-These steps ensure that the overall system is understandable, modular, and easy for instructors to examine.
-
----
-
-**In summary, this log reflects the complete trajectory of my work—from architectural redesign to implementing each component, verifying them through tests, and documenting the final system.** 
