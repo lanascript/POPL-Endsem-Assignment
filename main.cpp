@@ -1,4 +1,6 @@
+#include <filesystem>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include "core/FileReader.hpp"
 #include "core/Search.hpp"
@@ -8,14 +10,47 @@
 #include "interface/Menu.hpp"
 
 namespace {
+
+    List<std::string> load_tokens_from_directory(const std::string& corpus_dir) {
+        namespace fs = std::filesystem;
+
+        if (!fs::exists(corpus_dir)) {
+            throw std::runtime_error("Demo corpus directory missing: " + corpus_dir);
+        }
+
+        List<std::string> aggregated;
+        std::size_t files_found = 0;
+
+        std::cout << "Scanning " << corpus_dir << " for .txt files...\n";
+        for (const auto& entry : fs::directory_iterator(corpus_dir)) {
+            if (!entry.is_regular_file() || entry.path().extension() != ".txt") {
+                continue;
+            }
+            std::cout << "   - " << entry.path().filename().string() << "\n";
+            aggregated.append(FileReader::read_tokens(entry.path().string()));
+            ++files_found;
+        }
+
+        if (files_found == 0) {
+            throw std::runtime_error("No .txt files found in " + corpus_dir);
+        }
+
+        std::cout << "Collected " << aggregated.size() << " tokens from "
+                  << files_found << " files.\n";
+        return aggregated;
+    }
+
     void run_scripted_demo() {
         std::cout << "=== POPL Endsem Functional Demo ===\n";
 
-        auto tokens = FileReader::read_tokens("tests/sample.txt");
-        tokens.print("Tokens");
+        const std::string corpus_dir = "demo_data/articles";
+        const std::string keyword_file = "demo_data/keywords.txt";
 
-        std::cout << "\nIndex of 'hello': "
-                  << Search::linear_search(tokens, std::string("hello")) << "\n";
+        auto tokens = load_tokens_from_directory(corpus_dir);
+        tokens.print("Aggregated tokens");
+
+        std::cout << "\nIndex of 'functional': "
+                  << Search::linear_search(tokens, std::string("functional")) << "\n";
 
         Sort::sort_list(tokens);
         tokens.print("Sorted tokens");
@@ -26,7 +61,7 @@ namespace {
         filtered.print("Filtered tokens (len > 3)");
 
         try {
-            auto keywords = FileReader::read_tokens("tests/keywords.txt");
+            auto keywords = FileReader::read_tokens(keyword_file);
             auto freq = FunctionalOps::keyword_frequencies(tokens, keywords);
             freq.print("Keyword frequency");
         } catch (const std::exception& ex) {

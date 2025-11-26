@@ -1,0 +1,6 @@
+Vedashree recorded the lambda workshop where students combined OOP review
+sessions with functional drilling. The notes emphasize that the hello prompt
+must trigger the analytics pipeline, and every lambda expression should log
+context. World-building scenarios showcase how functional filters can be
+stacked before an OOP style renderer commits the results.
+

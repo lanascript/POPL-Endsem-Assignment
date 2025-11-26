@@ -1,0 +1,6 @@
+Hello team,
+We finalized the functional prototype today. The hello-world script now routes
+events through the lambda dispatcher, and the OOP shim only coordinates the
+UI widgets. Functional requirements still dominate the roadmap, so every
+developer must document their hello tests and lambda edge cases.
+

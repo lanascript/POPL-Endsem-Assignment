@@ -1,0 +1,6 @@
+Ashmita summarized three papers:
+1. Functional search heuristics beat OOP-only ones in mixed workloads.
+2. Lambda calculus visualizations improved the hello-onboarding exercises.
+3. World-scope refactorings become safer when functional reducers validate
+   each step.
+
