@@ -102,9 +102,17 @@ make clean
 Execute the main demonstration of the framework's capabilities:
 
 ```bash
-./demo          # scripted showcase using tests/sample.txt
+./demo          # scripted showcase using demo_data/*
 ./demo --menu   # interactive CLI with menu + pipelines
 ```
+
+The scripted demo now mirrors the assignment’s keyword-frequency use case:
+
+- Reads every `.txt` file inside `demo_data/articles/` and aggregates their tokens.
+- Loads keywords from `demo_data/keywords.txt`.
+- Prints keyword frequencies in descending order, alongside the search/sort/filter/pipeline walkthrough.
+
+Feel free to drop additional `.txt` files into `demo_data/articles/` or tweak the keyword file—no code changes are required.
 
 -----
 
